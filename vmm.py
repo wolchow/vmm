@@ -11,9 +11,11 @@ def main(vars_dict):
       ldap_server = vars_dict.get('ldapserver')
       DN = vars_dict.get('DN')
       Secret = vars_dict.get('Secret')
-      BASE = vars_dict.get('BASE')
+      Base = vars_dict.get('Base')
+      stud_login = ldap_search(stud_login,  ldap_server , DN , Secret, Base)[1][0][1].get('sAMAccountName')[0]
       vmname = stud_login+'_'+template
       session = conn(srv, login, pwd)
+      ldap_search(stud_login,  ldap_server , DN , Secret, Base)
       if (session > 0):
             if action == 'get_info':
                   return session.xenapi.VM.get_record(vmname)
@@ -143,12 +145,12 @@ def ldap_modifier_deco(ldap_search):
 
 def ldap_search(stud_login,  
       ldap_server , DN , Secret, Base ):
-      '''Find user in AD, check account status (should be not in disable state)'''      
+      '''Find user in AD, check account status (should not be in disable state)'''      
       Scope = ldap.SCOPE_SUBTREE
       Filter = "(&(sAMAccountname="+stud_login+")(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
       l = ldap.initialize(ldap_server)
       l.protocol_version = 3
-      l.network_timeout = 5
+      l.network_timeout = 5 #not always work
       l.simple_bind_s(DN,  Secret)
       l.set_option(ldap.OPT_REFERRALS,  0)
       r = l.search_st(Base, Scope, Filter,  timeout=5)
