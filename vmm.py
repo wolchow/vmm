@@ -1,13 +1,17 @@
-# !/usr/local/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 def main(vars_dict):
-      srv = vars_dict.get('server', 'localhost') #setting variables
-      login = vars_dict.get('service_login', 'root')
-      pwd = vars_dict.get('service_pwd', 'password')
+      srv = vars_dict.get('xenserver', 'localhost') #setting variables
+      login = vars_dict.get('xenlogin', 'root')
+      pwd = vars_dict.get('xenpwd', 'password')
       action = vars_dict.get('action', 'get_info')
       stud_login = vars_dict.get('stud_login', 'mif')
       template = vars_dict.get('template', 'CentOS_TEST')
+      ldap_server = vars_dict.get('ldapserver')
+      DN = vars_dict.get('DN')
+      Secret = vars_dict.get('Secret')
+      BASE = vars_dict.get('BASE')
       vmname = stud_login+'_'+template
       session = conn(srv, login, pwd)
       if (session > 0):
@@ -138,10 +142,7 @@ def ldap_modifier_deco(ldap_search):
       return wrapper
 
 def ldap_search(stud_login,  
-                              ldap_server = 'ldap://alpa.linguatext.intra', 
-                              DN = 'mif@linguatext.intra', 
-                              Secret = 'q7fO271p',
-                              Base = 'DC=linguatext,DC=intra' ):
+      ldap_server , DN , Secret, Base ):
       '''Find user in AD, check account status (should be not in disable state)'''      
       Scope = ldap.SCOPE_SUBTREE
       Filter = "(&(sAMAccountname="+stud_login+")(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
@@ -153,38 +154,13 @@ def ldap_search(stud_login,
       r = l.search_st(Base, Scope, Filter,  timeout=5)
       return l,  r[:1]
 
-#def ldap_auth(stud_login):
-#      import ldap
-#      ldap_server = 'ldap://alpa.linguatext.intra'
-#      DN = 'ldap@linguatext.intra'
-#      Secret = 'zukato10!'
-#      Base = 'DC=linguatext,DC=intra'
-#      Scope = ldap.SCOPE_SUBTREE
-#      Filter = "(&(sAMAccountname="+stud_login+")(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" #checking, if  ACCOUNTDISABLED bit set
-#      try:
-#            l = ldap.initialize(ldap_server)
-#            l.protocol_version = 3
-#            l.network_timeout = 5
-#            l.simple_bind_s(DN,  Secret)
-#            l.set_option(ldap.OPT_REFERRALS,  0)
-#            r = l.search_st(Base, Scope, Filter)
-#            user = l.result(r,  10)[1]
-#            Name, Props = user[0]
-#            if Name:
-#                  return Props.get('sAMAccountName')
-#      except Exception as ex:
-#            print "Couldn't connect to ldap server %s" % (ldap_server)
-#      return
-
 if  __name__ == '__main__':
       import XenAPI,  atexit,  time
-      import ldap
+      import ldap,  os,  sys
       import  ldap.modlist as modlist 
-      vars_dict={}
-      vars_dict['server'] = '192.168.0.77'
-      vars_dict['service_login'] = 'root'
-      vars_dict['service_pwd'] = 'zukato10!'
-      vars_dict['action'] = 'start'
-      vars_dict['stud_login'] = 'valeriag'
-      vars_dict['template'] = 'Ubuntu'
-      main(vars_dict)
+      try:
+            import settings #import default settings for vmm.py as dictionary
+      except Exception as ex:
+            print 'Bad config file settings.py'
+            print 'Exception: %s' % (ex)
+      main(settings.vars_dict)
