@@ -3,14 +3,9 @@
 # Initialization file for vmm.py
 
 vars_dict = {
-       'xenserver' : '192.168.0.77' ,
+       'xenserver' : '192.168.0.100' ,
        'xenlogin' : 'root' ,
-       'xenpwd' : 'zukato10!' ,
-       #'template' : 'Ubuntu',
-#       'ldapserver' : 'ldap://192.168.0.5' ,
-#       'DN' : 'ldap@linguatext.intra' ,
-#       'Secret' : 'zukato10!' ,
-#       'Base' : 'DC=linguatext, DC=intra'
+       'xenpwd' : 'p@$$w0rd' ,
               }
 
 
